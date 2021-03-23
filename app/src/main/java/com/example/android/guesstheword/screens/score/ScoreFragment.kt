@@ -22,6 +22,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.fragment.findNavController
 import com.example.android.guesstheword.databinding.FragmentScoreBinding
 
 /**
@@ -45,7 +46,24 @@ class ScoreFragment : Fragment() {
         viewModel = ViewModelProvider(this, viewModelFactory).get(ScoreViewModel::class.java)
 
         // set the text in scoreText to the final score in the ScoreViewModel
-        binding.scoreText.text = viewModel.score.toString()
+        // binding.scoreText.text = viewModel.score.toString()
+        // use an Observer to observe changes to viewModel.score
+        viewModel.score.observe(viewLifecycleOwner, {
+            binding.scoreText.text = it.toString()
+        })
+
+        // an observer for eventPlayAgain
+        viewModel.eventPlayAgain.observe(viewLifecycleOwner, {
+            if (it) {
+                // navigate back to the game screen
+                val directions = ScoreFragmentDirections.actionRestart()
+                findNavController().navigate(directions)
+                // reset eventPlayAgain
+                viewModel.onPlayAgainComplete()
+            }
+        })
+
+        binding.playAgainButton.setOnClickListener {  viewModel.onPlayAgain()  }
 
         return binding.root
     }

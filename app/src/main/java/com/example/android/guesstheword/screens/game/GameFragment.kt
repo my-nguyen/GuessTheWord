@@ -52,12 +52,34 @@ class GameFragment : Fragment() {
         /*resetList()
         nextWord()*/
 
+        // attach an Observer to the LiveData score. the Observer receives an event when the data
+        // held by the observed LiveData object changes. so when the value of score or the word
+        // changes, the score or word displayed on the screen now updates automatically
+        viewModel.score.observe(viewLifecycleOwner, {
+            binding.scoreText.text = it.toString()
+        })
+        viewModel.word.observe(viewLifecycleOwner, {
+            binding.wordText.text = it
+        })
+
+        // attach an Observer to eventGameFinish
+        viewModel.eventGameFinish.observe(viewLifecycleOwner, {
+            if (it) {
+                gameFinished()
+            }
+        })
+
+        viewModel.currentTimeString.observe(viewLifecycleOwner, {
+            binding.timerText.text = it
+        })
+
         binding.correctButton.setOnClickListener { onCorrect() }
         binding.skipButton.setOnClickListener { onSkip() }
         binding.endGameButton.setOnClickListener { onEndGame() }
 
-        updateScoreText()
-        updateWordText()
+        // updateScoreText and updateWordText have been replaced by the Observer for score and word above
+        /*updateScoreText()
+        updateWordText()*/
         return binding.root
     }
 
@@ -66,29 +88,32 @@ class GameFragment : Fragment() {
         /*score--
         nextWord()*/
         viewModel.onSkip()
-        updateWordText()
-        updateScoreText()
+        // updateScoreText and updateWordText have been replaced by the Observer for score and word in onCreateView()
+        /*updateWordText()
+        updateScoreText()*/
     }
 
     private fun onCorrect() {
         /*score++
         nextWord()*/
         viewModel.onSkip()
-        updateWordText()
-        updateScoreText()
+        // updateScoreText and updateWordText have been replaced by the Observer for score and word in onCreateView()
+        /*updateWordText()
+        updateScoreText()*/
     }
 
-    /** Methods for updating the UI **/
-
-    private fun updateWordText() {
+    // updateScoreText and updateWordText have been replaced by the Observer for score and word in onCreateView()
+    /*private fun updateWordText() {
         // binding.wordText.text = word
-        binding.wordText.text = viewModel.word
+        // binding.wordText.text = viewModel.word
+        binding.wordText.text = viewModel.word.value
     }
 
     private fun updateScoreText() {
         // binding.scoreText.text = score.toString()
-        binding.scoreText.text = viewModel.score.toString()
-    }
+        // binding.scoreText.text = viewModel.score.toString()
+        binding.scoreText.text = viewModel.score.value.toString()
+    }*/
 
     private fun onEndGame() {
         gameFinished()
@@ -100,7 +125,14 @@ class GameFragment : Fragment() {
 
         // navigate the app to the score screen. Pass in the score as an argument using Safe Args.
         val action = GameFragmentDirections.actionGameToScore()
-        action.score = viewModel.score
+        // action.score = viewModel.score
+        action.score = viewModel.score.value?:0
         NavHostFragment.findNavController(this).navigate(action)
+
+        // a screen rotation causes GameFragment to be recreated, and in onCreateView(), GameFragment
+        // will observe and receive the latest value of viewModel.eventGameFinish which is true,
+        // and so will call gameFinished() and create and display a new Toast: a screen rotation
+        // creates a new Toast. so viewModel._eventGameFinish needs to be reset to false.
+        viewModel.onGameFinishComplete()
     }
 }

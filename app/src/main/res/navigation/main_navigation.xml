@@ -23,7 +23,7 @@
         android:id="@+id/title_destination"
         android:name="com.example.android.guesstheword.screens.title.TitleFragment"
         android:label="title_fragment"
-        tools:layout="@layout/title_fragment">
+        tools:layout="@layout/fragment_title">
         <action
             android:id="@+id/action_title_to_game"
             app:destination="@id/game_destination"
